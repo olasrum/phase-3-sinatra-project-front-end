@@ -1,24 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import React, {useEffect, useState} from "react";
+import Header from "./Header";
+import Search from "./Search";
+import ExerciseList from "./ExerciseList";
 
 function App() {
+  const[darkMode, setDarkMode] = useState(true);
+  const[exercises, setExercises] = useState([]);
+  // const[categories, setCategories] = useState([]);
+  // const[categoryNames, setCategoryNames] = useState([]);
+  const[search, setSearch] = useState("");
+
+  useEffect(() => {
+    fetch("http://localhost:9292/weekly_workout")
+      .then((r) => r.json())
+      .then((exercises) => setExercises(exercises))
+  }, []);
+
+  // useEffect(() => {
+  //   fetch("http://localhost:9292/categories")
+  //     .then((r) => r.json())
+  //     .then((categories) => setCategories(categories))
+  // }, []);
+
+  function handleDarkModeClick() {
+    setDarkMode((darkMode) => !darkMode);
+  }
+  const displayedExercises = exercises.filter((exercise) =>
+  exercise.name.toLowerCase().includes(search.toLowerCase()));
+
+  // const displayedCategories = categories.filter((category) =>
+  // category.category.toLowerCase().includes(search.toLowerCase()));
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <main className={"App " + (darkMode ? "dark" : "light")}>
+      <Header darkMode={darkMode} onDarkModeClick={handleDarkModeClick}/>
+      <Search search={search} onSearchChange={setSearch}/>
+      <ExerciseList 
+        exercises={displayedExercises}
+        // categories={displayedCategories}
+      />
+    </main>
   );
 }
 
