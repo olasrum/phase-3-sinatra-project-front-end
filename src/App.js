@@ -1,45 +1,76 @@
-import React, {useEffect, useState} from "react";
-import Header from "./Header";
-import Search from "./Search";
+import React, {useState, useEffect} from "react";
 import ExerciseList from "./ExerciseList";
+import Header from "./Header";
+
+
 
 function App() {
   const[darkMode, setDarkMode] = useState(true);
-  const[exercises, setExercises] = useState([]);
-  // const[categories, setCategories] = useState([]);
-  // const[categoryNames, setCategoryNames] = useState([]);
-  const[search, setSearch] = useState("");
+  const [exercises, setExercises] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [exerciseCategories, setExerciseCategories] = useState([]);
+  const [categoryNames, setCategoryNames] = useState([]);
 
+  
   useEffect(() => {
-    fetch("http://localhost:9292/weekly_workout")
+    fetch("http://localhost:9292/exercises")
       .then((r) => r.json())
       .then((exercises) => setExercises(exercises))
   }, []);
 
-  // useEffect(() => {
-  //   fetch("http://localhost:9292/categories")
-  //     .then((r) => r.json())
-  //     .then((categories) => setCategories(categories))
-  // }, []);
+  useEffect(() => {
+    fetch("http://localhost:9292/exercises_categories")
+      .then((r) => r.json())
+      .then(function(exerciseCategories) {
+        setExerciseCategories(exerciseCategories)
+        const categories_arr = exerciseCategories.map(e => e.category)
+        categories_arr.unshift("All")
+        setCategoryNames(categories_arr)});
+  }, []);
+
+
+  function handleDeleteExercise(key) {
+    setExercises(exercises.filter((element) => (element.id !== key)))
+  }
+
+  function handleCategorySelected(category) {
+    setSelectedCategory(category)
+  }
+
+  function addNewExercise(newExercise) {
+    setExercises([...exercises, newExercise])
+  }
 
   function handleDarkModeClick() {
     setDarkMode((darkMode) => !darkMode);
   }
-  const displayedExercises = exercises.filter((exercise) =>
-  exercise.name.toLowerCase().includes(search.toLowerCase()));
-
-  // const displayedCategories = categories.filter((category) =>
-  // category.category.toLowerCase().includes(search.toLowerCase()));
   
+  const selectedCategoryObj = exerciseCategories.find(obj => {
+    return obj.name === selectedCategory
+  })
+
+  let selectedExercises = []
+  if (selectedCategory === "All") {
+    selectedExercises = exercises
+  } else {
+    selectedExercises = exercises.filter((exercise) => 
+    (exercise.category_id === selectedCategoryObj.id))
+  }
+
   return (
-    <main className={"App " + (darkMode ? "dark" : "light")}>
+    <div className={"App " + (darkMode ? "dark" : "light")}>
       <Header darkMode={darkMode} onDarkModeClick={handleDarkModeClick}/>
-      <Search search={search} onSearchChange={setSearch}/>
       <ExerciseList 
-        exercises={displayedExercises}
-        // categories={displayedCategories}
+      onDeleteExercise={handleDeleteExercise} 
+      exercises={selectedExercises} 
+      categoryNames={categoryNames} 
+      onNewExerciseFormSubmit={addNewExercise}
+      exerciseCategories={exerciseCategories}
+      selectedCategory={selectedCategory} 
+      onCategorySelected={handleCategorySelected}
       />
-    </main>
+      </div>
+
   );
 }
 

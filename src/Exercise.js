@@ -1,14 +1,20 @@
 import React from "react";
 
-function Exercise({exercise}) {
+function Exercise({ category, name, exerciseId, onDeleteExercise }) {
 
+    function handleClick() {
+        fetch(`http://localhost:9292/exercises/${exerciseId}`, {
+            method: "DELETE"
+        });
+        onDeleteExercise(exerciseId)}
 
-  return (
-      <div className="workout-container">
-        <p className="exercises">{exercise.name} </p>
-        <sup className="notes">{exercise.note}</sup>
-      </div> 
-  );
+    return (
+        <div className="exercise">
+            <div className="exercise-cat">{category}</div>
+            <div className="exercise-name">{name}</div>
+            <button className="delete-button" onClick={handleClick}>X</button>
+        </div>
+    )
 }
 
 export default Exercise;
